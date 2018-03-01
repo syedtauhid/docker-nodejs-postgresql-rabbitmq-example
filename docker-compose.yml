@@ -1,0 +1,38 @@
+version: "3"
+services:
+    rabbit:
+        image: rabbitmq:3-management
+        deploy:
+            restart_policy:
+                condition: on-failure
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+
+    postgres:
+        image: postgres
+        restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_PASSWORD=admin
+            - POSTGRES_USER=admin
+            - POSTGRES_DB=postgres
+
+    publisher:
+        build: ./publisher-service
+        image: abaig316/docker-getting-started-publisher-service
+        environment:
+            - RABBIT_HOST=amqp://rabbit
+
+    consumer:
+        build: ./consumer-service
+        image: abaig316/docker-getting-started-consumer-service
+        ports:
+            - "3000:3000"
+        environment:
+            - RABBIT_HOST=amqp://rabbit
+            - POSTGRES_HOST=postgres
+            - POSTGRES_PASSWORD=admin
+            - POSTGRES_USER=admin
+            - POSTGRES_DB=postgres
